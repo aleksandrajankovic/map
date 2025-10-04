@@ -70,7 +70,7 @@
         padding: 8px 12px;
         border-radius: 10px;
         border: 1px solid #25364a;
-        
+
         color: #e5e7eb;
         font-weight: 700;
         font-size: 14px;
@@ -78,7 +78,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         cursor: pointer;
-         background: linear-gradient(90deg, #1c2f38 0%, #10181c 100%);
+        background: linear-gradient(90deg, #1c2f38 0%, #10181c 100%);
       }
       .city-tab.active {
         background: var(--bg);
@@ -216,7 +216,7 @@
         .wrap {
           grid-template-columns: 1fr;
           grid-template-rows: auto minmax(0, 1fr);
-          min-height: 100svh; 
+          min-height: 100svh;
         }
 
         .sidebar {
@@ -233,7 +233,6 @@
           margin-left: 50%;
           transform: translateX(-50%);
           padding: 12px;
-          
         }
 
         .searchBox {
@@ -621,8 +620,24 @@
           const goTo = () => {
             const m = markerById[it.id];
             if (!m) return;
+
+            // skok na marker
             map.flyTo(m.getLatLng(), 16, { duration: 0.8 });
-            setTimeout(() => m.openPopup(), 850);
+
+            // otvori popup i (na mobilu) sklopi listu
+            setTimeout(() => {
+              m.openPopup();
+
+              // samo na mobilu (<= 900px)
+              if (window.matchMedia("(max-width: 900px)").matches) {
+                // skloni proširenje sidebara
+                sidebar.classList.remove("expanded");
+                // zatvori sve otvorene panele u accordionu
+                document
+                  .querySelectorAll("#accordion .acc-item.open")
+                  .forEach((el) => el.classList.remove("open"));
+              }
+            }, 850); // možeš smanjiti na 300ms ako želiš brže
           };
           if (it.lat != null && it.lng != null) {
             row.addEventListener("click", goTo);
@@ -658,7 +673,6 @@
             tab.classList.contains("active");
 
           if (alreadyOpen) {
-            // ZATVARANJE: skupi sidebar i zatvori panele
             sidebar.classList.remove("expanded");
             tab.classList.remove("active");
             [...accordion.children].forEach((el) =>
@@ -667,14 +681,12 @@
             return;
           }
 
-          // OTVARANJE: aktiviraj tab, proširi sidebar, otvori panel
           [...tabsWrap.children].forEach((x) => x.classList.remove("active"));
           tab.classList.add("active");
           sidebar.classList.add("expanded");
           [...accordion.children].forEach((el) => el.classList.remove("open"));
           if (target) target.classList.add("open");
 
-          // fokusiraj mapu na taj grad
           const pts = grouped[city]
             .filter((x) => x.lat != null && x.lng != null)
             .map((x) => [x.lat, x.lng]);
