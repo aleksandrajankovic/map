@@ -150,12 +150,18 @@
         color: #e5e7eb;
         backdrop-filter: blur(4px);
       }
-      .leaflet-popup-content p {
-        margin: 0px !important;
-      }
+
       /* Mobile */
-      path {
+      .pin-icon {
         fill: #73abc1;
+      }
+      .ico {
+        width: 20px;
+        height: 20px;
+        stroke: #73abc1 !important; /* promeni po želji */
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
       }
       /* lepši skrolbar (opciono) */
       .acc-panel::-webkit-scrollbar {
@@ -191,13 +197,23 @@
       .leaflet-popup-content p {
         font-size: 14px;
         color: #bdbdbd;
+        margin: 0px !important;
+        padding-top: 6px;
+      }
+      .box {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        gap: 5px;
       }
       .leaflet-container a.leaflet-popup-close-button {
         font: 20px / 25px Tahoma, Verdana, sans-serif;
         color: #bdbdbd;
-        padding-right:10px;
+        padding-right: 10px;
       }
-      .leaflet-pane.leaflet-popup-pane { z-index: 1000 !important; }
+      .leaflet-pane.leaflet-popup-pane {
+        z-index: 1000 !important;
+      }
       @media (max-width: 900px) {
         .wrap {
           grid-template-columns: 1fr;
@@ -228,204 +244,382 @@
       <div id="map"></div>
     </div>
 
-  <script>
-    /* ===== Custom pin ikona ===== */
-    const myIcon = L.icon({
-      iconUrl: './meridianbet-pin.png',      
-      iconRetinaUrl: './meridianbet-pin.png',
-      iconSize: [30, 42],   
-      iconAnchor: [15, 42],  
-      popupAnchor: [0, -38],
-    });
-
-    const grouped = {
-      Beograd: [
-        { id:"bg-njegoseva-56", title:"Njegoševa 56 (Vračar)", lat:44.801345, lng:20.4721552 },
-        { id:"bg-karadjordjeva-85", title:"Karađorđeva 85", lat:44.81, lng:20.4560828 },
-        { id:"bg-ustanicka-182b", title:"Ustanička 182b", lat:44.7825524052827, lng:20.506569709437912 },
-        { id:"bg-vojvode-stepe-276", title:"Vojvode Stepe 276", lat:44.76863098144531, lng:20.479394912719727 },
-        { id:"bg-gandijeva-5", title:"Gandijeva 5", lat:44.81016681469866, lng:20.38348548372806 },
-        { id:"bg-brankova-1", title:"Brankova 1", lat:44.81417630518717, lng:20.45697514867069 },
-        { id:"bg-sarajevska-47", title:"Sarajevska 47", lat:44.80245216570846, lng:20.45391057420993 },
-        { id:"bg-cvijiceva-36", title:"Cvijićeva 36", lat:44.8161108, lng:20.476765 },
-        { id:"bg-cara-dusana-66", title:"Cara Dušana 66", lat:44.8215048, lng:20.4630299 },
-        { id:"bg-zorana-radmilovica-4", title:"Zorana Radmilovića 4", lat:44.79069324058684, lng:20.539028053486877 },
-        { id:"bg-japanska-4", title:"Japanska 4", lat:44.8071444, lng:20.382573 },
-        { id:"bg-visnjicki-venac-1r", title:"Višnjički venac 1r", lat:44.81599831621861, lng:20.5323263291476 },
-        { id:"bg-kraljice-marije-10", title:"Kraljice Marije 10", lat:44.8084814, lng:20.4760552 },
-        { id:"bg-jurija-gagarina-14dj", title:"Jurija Gagarina 14đ", lat:44.805256, lng:20.409187 },
-        { id:"bg-urosa-martinovica-4", title:"Uroša Martinovića 4", lat:44.80650529310622, lng:20.401474624641907 },
-        { id:"bg-borca-ivana-milutinovica-75", title:"Borča - Ivana Milutinovića 75", lat:44.8763378, lng:20.463467 },
-        { id:"bg-ledine-vojvodjanska-414", title:"Ledine - Vojvođanska 414", lat:44.7983863, lng:20.3211546 },
-      ],
-      Zlatibor: [
-        { id:"zlatibor-centar", title:"Zlatibor (centar)", lat:43.8557776, lng:19.8395117 },
-      ],
-      Kraljevo: [
-        { id:"kraljevo-beogradska-5", title:"Beogradska 5", lat:43.7210299, lng:20.692125 },
-      ],
-      "Novi Pazar": [
-        { id:"novipazar-2", title:"Veljka Vlahovića 12a", lat:43.1346086, lng:20.512921 },
-        { id:"novipazar-3", title:"Stevana Nemanje 59b", lat:43.1435129, lng:20.5187372 },
-      ],
-      Niš: [
-        { id:"nis-kalca", title:"Obrenovićeva bb", lat:43.3189184, lng:21.8950417 },
-        { id:"nis-novi-bulevar", title:"Trg Svetog Save 21g", lat:43.32030040240967, lng:21.91777327453966 },
-        { id:"nis-zeleznicka", title:"Železnička", lat:43.3154322, lng:21.8762086 },
-      ],
-      "Novi Sad": [
-        { id:"ns-sutjeska-2", title:"Sutjeska 2", lat:45.24746388307974, lng:19.84563635510584 },
-        { id:"ns-cara-dusana-62", title:"Cara Dušana 62", lat:45.2426188560747, lng:19.8250526836245 },
-      ],
-      Kragujevac: [
-        { id:"kg-centar", title:"Kragujevac (centar)", lat:44.0131786, lng:20.9196353 },
-      ],
-      Kruševac: [
-        { id:"ks-colak-antina-28", title:"Čolak Antina 28", lat:43.5815974, lng:21.3294803 },
-      ],
-      Vranje: [
-        { id:"vranje-centar", title:"Vranje (centar)", lat:42.5543511, lng:21.8979003 },
-      ],
-      Ruma: [
-        { id:"ruma-centar", title:"Ruma (centar)", lat:45.00874798956543, lng:19.818571424985745 },
-      ],
-    };
-
-    /* ===== MAPA + slojevi ===== */
-    const map = L.map("map").setView([44.8176, 20.4569], 6);
-
-  
-    map.createPane("basemap");
-    map.createPane("labels");
-    map.createPane("markers");
-    map.getPane("labels").style.zIndex = 650;
-    map.getPane("labels").style.pointerEvents = "none";
-    map.getPane("markers").style.zIndex = 660;
-
-    // DARK bez etiketa
-    const darkBase = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
-      { pane: "basemap", maxZoom: 20, attribution: "&copy; OpenStreetMap contributors &copy; CARTO" }
-    );
-
-    // DARK samo etikete (beli labeli)
-    const darkLabels = L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
-      { pane: "labels", maxZoom: 20 }
-    );
-
-
-
-    // Podrazumevano upali DARK
-    darkBase.addTo(map);
-    darkLabels.addTo(map);
-
-  
-
-    /* ===== Markeri + indeks ===== */
-    const markerById = {};
-    const boundsAll = [];
-
-    for (const [city, items] of Object.entries(grouped)) {
-      items.forEach((it) => {
-        if (it.lat != null && it.lng != null) {
-          const m = L.marker([it.lat, it.lng], { icon: myIcon, pane: "markers" })
-            .addTo(map)
-            .bindPopup(`<h3 style="margin:.25rem 0">Meridianbet</h3><p style="margin:.25rem 0">${it.title}</p><p style="margin:.25rem 0;opacity:.8">${city}</p>`);
-          markerById[it.id] = m;
-          boundsAll.push([it.lat, it.lng]);
-        }
+    <script>
+      /* ===== Custom pin ikona ===== */
+      const myIcon = L.icon({
+        iconUrl: "./meridianbet-pin.png",
+        iconRetinaUrl: "./meridianbet-pin.png",
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -38],
       });
-    }
-    if (boundsAll.length) {
-      map.fitBounds(boundsAll, { padding: [30, 30] });
-    }
 
-    /* ===== Accordion UI ===== */
-    const accordion = document.getElementById("accordion");
-    const countWithCoords = items => items.filter(x => x.lat!=null && x.lng!=null).length;
+      const grouped = {
+        Beograd: [
+          {
+            id: "bg-njegoseva-56",
+            title: "Njegoševa 56 (Vračar)",
+            lat: 44.801345,
+            lng: 20.4721552,
+          },
+          {
+            id: "bg-karadjordjeva-85",
+            title: "Karađorđeva 85",
+            lat: 44.81,
+            lng: 20.4560828,
+          },
+          {
+            id: "bg-ustanicka-182b",
+            title: "Ustanička 182b",
+            lat: 44.7825524052827,
+            lng: 20.506569709437912,
+          },
+          {
+            id: "bg-vojvode-stepe-276",
+            title: "Vojvode Stepe 276",
+            lat: 44.76863098144531,
+            lng: 20.479394912719727,
+          },
+          {
+            id: "bg-gandijeva-5",
+            title: "Gandijeva 5",
+            lat: 44.81016681469866,
+            lng: 20.38348548372806,
+          },
+          {
+            id: "bg-brankova-1",
+            title: "Brankova 1",
+            lat: 44.81417630518717,
+            lng: 20.45697514867069,
+          },
+          {
+            id: "bg-sarajevska-47",
+            title: "Sarajevska 47",
+            lat: 44.80245216570846,
+            lng: 20.45391057420993,
+          },
+          {
+            id: "bg-cvijiceva-36",
+            title: "Cvijićeva 36",
+            lat: 44.8161108,
+            lng: 20.476765,
+          },
+          {
+            id: "bg-cara-dusana-66",
+            title: "Cara Dušana 66",
+            lat: 44.8215048,
+            lng: 20.4630299,
+          },
+          {
+            id: "bg-zorana-radmilovica-4",
+            title: "Zorana Radmilovića 4",
+            lat: 44.79069324058684,
+            lng: 20.539028053486877,
+          },
+          {
+            id: "bg-japanska-4",
+            title: "Japanska 4",
+            lat: 44.8071444,
+            lng: 20.382573,
+          },
+          {
+            id: "bg-visnjicki-venac-1r",
+            title: "Višnjički venac 1r",
+            lat: 44.81599831621861,
+            lng: 20.5323263291476,
+          },
+          {
+            id: "bg-kraljice-marije-10",
+            title: "Kraljice Marije 10",
+            lat: 44.8084814,
+            lng: 20.4760552,
+          },
+          {
+            id: "bg-jurija-gagarina-14dj",
+            title: "Jurija Gagarina 14đ",
+            lat: 44.805256,
+            lng: 20.409187,
+          },
+          {
+            id: "bg-urosa-martinovica-4",
+            title: "Uroša Martinovića 4",
+            lat: 44.80650529310622,
+            lng: 20.401474624641907,
+          },
+          {
+            id: "bg-borca-ivana-milutinovica-75",
+            title: "Borča - Ivana Milutinovića 75",
+            lat: 44.8763378,
+            lng: 20.463467,
+          },
+          {
+            id: "bg-ledine-vojvodjanska-414",
+            title: "Ledine - Vojvođanska 414",
+            lat: 44.7983863,
+            lng: 20.3211546,
+          },
+        ],
+        Zlatibor: [
+          {
+            id: "zlatibor-centar",
+            title: "Miladina Pećinara 119",
+            lat: 43.72611442864385,
+            lng: 19.696825584412423,
+          },
+        ],
+        Kraljevo: [
+          {
+            id: "kraljevo-beogradska-5",
+            title: "Beogradska 5",
+            lat: 43.7210299,
+            lng: 20.692125,
+          },
+        ],
+        "Novi Pazar": [
+          {
+            id: "novipazar-2",
+            title: "Veljka Vlahovića 12a",
+            lat: 43.1346086,
+            lng: 20.512921,
+          },
+          {
+            id: "novipazar-3",
+            title: "Stevana Nemanje 59b",
+            lat: 43.1435129,
+            lng: 20.5187372,
+          },
+        ],
+        Niš: [
+          {
+            id: "nis-kalca",
+            title: "Obrenovićeva bb",
+            lat: 43.3189184,
+            lng: 21.8950417,
+          },
+          {
+            id: "nis-novi-bulevar",
+            title: "Trg Svetog Save 21g",
+            lat: 43.32030040240967,
+            lng: 21.91777327453966,
+          },
+          {
+            id: "nis-zeleznicka",
+            title: "Železnička",
+            lat: 43.3154322,
+            lng: 21.8762086,
+          },
+        ],
+        "Novi Sad": [
+          {
+            id: "ns-sutjeska-2",
+            title: "Sutjeska 2",
+            lat: 45.24746388307974,
+            lng: 19.84563635510584,
+          },
+          {
+            id: "ns-cara-dusana-62",
+            title: "Cara Dušana 62",
+            lat: 45.2426188560747,
+            lng: 19.8250526836245,
+          },
+        ],
+        Kragujevac: [
+          {
+            id: "kg-centar",
+            title: "Aleksandra Saše Čančarevića 1",
+            lat: 44.01403092529991,
+            lng: 20.897043850434745,
+          },
+        ],
+        Kruševac: [
+          {
+            id: "ks-colak-antina-28",
+            title: "Čolak Antina 28",
+            lat: 43.5815974,
+            lng: 21.3294803,
+          },
+        ],
+        Vranje: [
+          {
+            id: "vranje-centar",
+            title: "Beogradska 39a",
+            lat: 42.55158156904805,
+            lng: 21.89686853897778,
+          },
+        ],
+        Ruma: [
+          {
+            id: "ruma-centar",
+            title: "Glavna 164",
+            lat: 45.00803756402931,
+            lng: 19.82114866827308,
+          },
+        ],
+      };
 
-    for (const [city, items] of Object.entries(grouped)) {
-      const hasCoords = countWithCoords(items);
-      const item = document.createElement("div");
-      item.className = "acc-item";
+      /* ===== MAPA + slojevi ===== */
+      const map = L.map("map").setView([44.8176, 20.4569], 6);
 
-      const btn = document.createElement("button");
-      btn.className = "acc-btn";
-      btn.type = "button";
-      btn.innerHTML = `<div>${city}</div><span><span class="badge">${hasCoords}/${items.length}</span> ▾</span>`;
-      btn.addEventListener("click", () => {
-        item.classList.toggle("open");
-        if (item.classList.contains("open")) {
-          const pts = items.filter(x => x.lat!=null && x.lng!=null).map(x => [x.lat, x.lng]);
-          if (pts.length) {
-            const fg = L.featureGroup(pts.map(p => L.marker(p)));
-            map.fitBounds(fg.getBounds(), { padding: [40, 40] });
+      map.createPane("basemap");
+      map.createPane("labels");
+      map.createPane("markers");
+      map.getPane("labels").style.zIndex = 650;
+      map.getPane("labels").style.pointerEvents = "none";
+      map.getPane("markers").style.zIndex = 660;
+
+      // DARK bez etiketa
+      const darkBase = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
+        {
+          pane: "basemap",
+          maxZoom: 20,
+          attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        }
+      );
+
+      // DARK samo etikete (beli labeli)
+      const darkLabels = L.tileLayer(
+        "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
+        { pane: "labels", maxZoom: 20 }
+      );
+
+      // Podrazumevano upali DARK
+      darkBase.addTo(map);
+      darkLabels.addTo(map);
+
+      /* ===== Markeri + indeks ===== */
+      const markerById = {};
+      const boundsAll = [];
+
+      for (const [city, items] of Object.entries(grouped)) {
+        items.forEach((it) => {
+          if (it.lat != null && it.lng != null) {
+            const m = L.marker([it.lat, it.lng], {
+              icon: myIcon,
+              pane: "markers",
+            }).addTo(map)
+              .bindPopup(`<h3 style="margin:.25rem 0">Meridianbet</h3><span class="box"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z" fill="none"/>
+  <circle cx="12" cy="9.75" r="2.75" fill="none"/>
+</svg><p style="margin:.25rem 0"> ${it.title}</p></span><span class="box"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+  <!-- Ground -->
+  <path d="M3 21h18" fill="none"/>
+  <!-- Left building -->
+  <path d="M5 21V13h3v8" fill="none"/>
+  <!-- Middle tower -->
+  <path d="M10 21V7h3v14" fill="none"/>
+  <!-- Right building -->
+  <path d="M15 21V10h4v11" fill="none"/>
+  <!-- Few window hints (subtle) -->
+  <path d="M11 10.5h0 M11 13.5h0 M16.5 12h0 M7 15h0" fill="none"/>
+</svg><p style="margin:.25rem 0;opacity:.8">${city}</p></span>`);
+            markerById[it.id] = m;
+            boundsAll.push([it.lat, it.lng]);
           }
-        }
-      });
+        });
+      }
+      if (boundsAll.length) {
+        map.fitBounds(boundsAll, { padding: [30, 30] });
+      }
 
-      const panel = document.createElement("div");
-      panel.className = "acc-panel";
+      /* ===== Accordion UI ===== */
+      const accordion = document.getElementById("accordion");
+      const countWithCoords = (items) =>
+        items.filter((x) => x.lat != null && x.lng != null).length;
 
-      items.forEach((it) => {
-        const row = document.createElement("div");
-        row.className = "addr" + ((it.lat==null || it.lng==null) ? " disabled" : "");
-        row.setAttribute("role", "button");
-        row.setAttribute("tabindex", "0");
-        row.dataset.addrId = it.id;
+      for (const [city, items] of Object.entries(grouped)) {
+        const hasCoords = countWithCoords(items);
+        const item = document.createElement("div");
+        item.className = "acc-item";
 
-        row.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        const btn = document.createElement("button");
+        btn.className = "acc-btn";
+        btn.type = "button";
+        btn.innerHTML = `<div>${city}</div><span><span class="badge">${hasCoords}/${items.length}</span> ▾</span>`;
+        btn.addEventListener("click", () => {
+          item.classList.toggle("open");
+          if (item.classList.contains("open")) {
+            const pts = items
+              .filter((x) => x.lat != null && x.lng != null)
+              .map((x) => [x.lat, x.lng]);
+            if (pts.length) {
+              const fg = L.featureGroup(pts.map((p) => L.marker(p)));
+              map.fitBounds(fg.getBounds(), { padding: [40, 40] });
+            }
+          }
+        });
+
+        const panel = document.createElement("div");
+        panel.className = "acc-panel";
+
+        items.forEach((it) => {
+          const row = document.createElement("div");
+          row.className =
+            "addr" + (it.lat == null || it.lng == null ? " disabled" : "");
+          row.setAttribute("role", "button");
+          row.setAttribute("tabindex", "0");
+          row.dataset.addrId = it.id;
+
+          row.innerHTML = `
+          <svg class="pin-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
           </svg>
           <div>
             <div>${it.title}</div>
-            <small>${(it.lat!=null && it.lng!=null) ? 'Klikni za prikaz na mapi' : 'Nedostaju koordinate'}</small>
+            <small>${
+              it.lat != null && it.lng != null
+                ? "Klikni za prikaz na mapi"
+                : "Nedostaju koordinate"
+            }</small>
           </div>
         `;
 
-        const goTo = () => {
-          const m = markerById[it.id];
-          if (!m) return;
-          map.flyTo(m.getLatLng(), 16, { duration: 0.8 });
-          setTimeout(() => m.openPopup(), 850);
-        };
-        if (it.lat!=null && it.lng!=null) {
-          row.addEventListener("click", goTo);
-          row.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goTo(); }
-          });
-        }
+          const goTo = () => {
+            const m = markerById[it.id];
+            if (!m) return;
+            map.flyTo(m.getLatLng(), 16, { duration: 0.8 });
+            setTimeout(() => m.openPopup(), 850);
+          };
+          if (it.lat != null && it.lng != null) {
+            row.addEventListener("click", goTo);
+            row.addEventListener("keydown", (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                goTo();
+              }
+            });
+          }
 
-        panel.appendChild(row);
-      });
-
-      item.appendChild(btn);
-      item.appendChild(panel);
-      accordion.appendChild(item);
-    }
-
-    /* ===== Pretraga ===== */
-    const q = document.getElementById("search");
-    q.addEventListener("input", () => {
-      const term = q.value.trim().toLowerCase();
-      [...accordion.children].forEach((block) => {
-        const city = block.querySelector(".acc-btn div").textContent.toLowerCase();
-        const rows = [...block.querySelectorAll(".addr")];
-        let anyVisible = false;
-
-        rows.forEach((r) => {
-          const t = r.innerText.toLowerCase();
-          const match = city.includes(term) || t.includes(term);
-          r.style.display = match ? "" : "none";
-          if (match) anyVisible = true;
+          panel.appendChild(row);
         });
 
-        block.style.display = anyVisible ? "" : "none";
-        if (term && anyVisible) block.classList.add("open");
+        item.appendChild(btn);
+        item.appendChild(panel);
+        accordion.appendChild(item);
+      }
+
+      /* ===== Pretraga ===== */
+      const q = document.getElementById("search");
+      q.addEventListener("input", () => {
+        const term = q.value.trim().toLowerCase();
+        [...accordion.children].forEach((block) => {
+          const city = block
+            .querySelector(".acc-btn div")
+            .textContent.toLowerCase();
+          const rows = [...block.querySelectorAll(".addr")];
+          let anyVisible = false;
+
+          rows.forEach((r) => {
+            const t = r.innerText.toLowerCase();
+            const match = city.includes(term) || t.includes(term);
+            r.style.display = match ? "" : "none";
+            if (match) anyVisible = true;
+          });
+
+          block.style.display = anyVisible ? "" : "none";
+          if (term && anyVisible) block.classList.add("open");
+        });
       });
-    });
-  </script>
+    </script>
   </body>
 </html>
