@@ -8,12 +8,7 @@
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet"
-    />
+
     <style>
       :root {
         --sidebar-w: 380px;
@@ -23,20 +18,22 @@
       }
       * {
         box-sizing: border-box;
-        margin: 0px;
-        padding: 0px;
+        margin: 0;
+        padding: 0;
       }
       body {
-        margin: 0;
-        font-family: system-ui, -apple-system, "Roboto", Segoe UI, Roboto, Arial,
+        font-family: system-ui, -apple-system, "Roboto", Segoe UI, Arial,
           sans-serif;
+        background: #0b1220;
+        color: #e5e7eb;
       }
+
+      /* Desktop raspored */
       .wrap {
         display: grid;
         grid-template-columns: minmax(260px, var(--sidebar-w)) 1fr;
         min-height: 100vh;
       }
-      /* Sidebar */
       .sidebar {
         border-right: 1px solid var(--border);
         padding: 12px;
@@ -48,6 +45,7 @@
         top: 0;
         background: var(--bg);
         padding-bottom: 8px;
+        z-index: 2;
       }
       .searchBox input {
         width: 100%;
@@ -57,13 +55,38 @@
         background: var(--bg);
         color: #e5e7eb;
       }
-      .hint {
-        color: var(--muted);
-        font-size: 12px;
-        margin: 6px 2px 10px;
+
+      /* ---- MOBILNI TABS (vodoravni) ---- */
+      .city-tabs {
+        display: none;
+      } /* desktop sakriveno */
+      .city-tab {
+        flex: 0 0 150px;
+        width: 150px;
+        max-width: 150px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px solid #25364a;
+        
+        color: #e5e7eb;
+        font-weight: 700;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+         background: linear-gradient(90deg, #1c2f38 0%, #10181c 100%);
+      }
+      .city-tab.active {
+        background: var(--bg);
+        border-color: var(--border);
+        color: #bdbdbd;
       }
 
-      /* Accordion */
+      /* Accordion (desktop) */
       .acc-item {
         border: 1px solid var(--border);
         border-radius: 10px;
@@ -81,14 +104,12 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        color: #f2f2f2;
       }
       .acc-btn span {
         font-size: 14px;
         color: var(--muted);
         font-weight: 500;
-      }
-      .acc-btn div {
-        color: #f2f2f2;
       }
       .acc-panel {
         display: none;
@@ -97,8 +118,9 @@
       .acc-item.open .acc-panel {
         display: block;
         max-height: 500px;
-        overflow-y: scroll;
+        overflow-y: auto;
       }
+
       .addr {
         display: flex;
         align-items: center;
@@ -107,15 +129,14 @@
         border-radius: 8px;
         cursor: pointer;
       }
-      .addr div {
-        color: #f2f2f2;
-      }
-
       .addr:hover {
         background: linear-gradient(90deg, #1c2f38 0%, #10181c 100%);
       }
       .addr small {
         color: var(--muted);
+      }
+      .addr div {
+        color: #f2f2f2;
       }
       .addr.disabled {
         opacity: 0.5;
@@ -126,44 +147,6 @@
         padding: 2px 6px;
         border-radius: 999px;
       }
-
-      /* Map */
-      #map {
-        width: 100%;
-        height: 100vh;
-      }
-      #map {
-        background: #0b1220;
-      } /* fallback dok se tile-ovi učitaju */
-      .leaflet-popup-content-wrapper,
-      .leaflet-popup-tip {
-        background: rgba(17, 24, 39, 0.9);
-        color: #e5e7eb;
-      }
-      .leaflet-popup-content {
-        width: 200px !important;
-        height: 100px !important;
-      }
-      .leaflet-control-attribution,
-      .leaflet-control-layers {
-        background: rgba(17, 24, 39, 0.75);
-        color: #e5e7eb;
-        backdrop-filter: blur(4px);
-      }
-
-      /* Mobile */
-      .pin-icon {
-        fill: #73abc1;
-      }
-      .ico {
-        width: 20px;
-        height: 20px;
-        stroke: #73abc1 !important; /* promeni po želji */
-        stroke-width: 1.8;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-      /* lepši skrolbar (opciono) */
       .acc-panel::-webkit-scrollbar {
         width: 10px;
       }
@@ -178,11 +161,31 @@
         scrollbar-color: #233045 transparent;
         scrollbar-width: thin;
       }
+
+      /* Mapa */
+      #map {
+        width: 100%;
+        height: 100vh;
+        background: #0b1220;
+      }
       .leaflet-popup-content-wrapper,
       .leaflet-popup-tip {
-        background: #284755;
+        background: #16232a;
         color: #e5e7eb;
         border: 1px solid #396f85;
+      }
+      .leaflet-control-attribution,
+      .leaflet-control-layers {
+        background: rgba(17, 24, 39, 0.75);
+        color: #e5e7eb;
+        backdrop-filter: blur(4px);
+      }
+      .leaflet-pane.leaflet-popup-pane {
+        z-index: 1000 !important;
+      }
+      .leaflet-popup-content {
+        width: 200px !important;
+        height: 100px !important;
       }
       .leaflet-popup-content {
         display: flex;
@@ -200,44 +203,104 @@
         margin: 0px !important;
         padding-top: 6px;
       }
-      .box {
-        display: flex;
-        justify-content: left;
-        align-items: center;
-        gap: 5px;
+      .pin-icon {
+        fill: #73abc1;
       }
-      .leaflet-container a.leaflet-popup-close-button {
-        font: 20px / 25px Tahoma, Verdana, sans-serif;
-        color: #bdbdbd;
-        padding-right: 10px;
-      }
-      .leaflet-pane.leaflet-popup-pane {
-        z-index: 1000 !important;
-      }
+      /* ===== RESPONSIVE ===== */
       @media (max-width: 900px) {
+        html,
+        body {
+          overflow-x: hidden;
+        }
+
         .wrap {
           grid-template-columns: 1fr;
+          grid-template-rows: auto minmax(0, 1fr);
+          min-height: 100svh; 
         }
+
         .sidebar {
-          height: 42vh;
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+          padding: 0; /* <— važno */
+          overflow: visible;
+          height: auto;
         }
+
+        .searchBox,
+        .city-tabs {
+          width: 100svw;
+          margin-left: 50%;
+          transform: translateX(-50%);
+          padding: 12px;
+          
+        }
+
+        .searchBox {
+          padding-bottom: 8px;
+        }
+        .searchBox input {
+          width: 100%;
+          border-radius: 10px;
+        }
+
+        .city-tabs {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          padding-top: 6px;
+          padding-bottom: 10px;
+        }
+        .city-tabs::-webkit-scrollbar {
+          display: none;
+        }
+
+        .city-tab {
+          flex: 0 0 150px;
+          width: 150px;
+          max-width: 150px;
+          white-space: nowrap;
+        }
+
+        .acc-btn {
+          display: none;
+        }
+        .acc-item {
+          border: none;
+          margin: 0;
+          background: transparent;
+        }
+        .sidebar:not(.expanded) .acc-panel {
+          display: none !important;
+        }
+        .sidebar.expanded .acc-item.open .acc-panel {
+          display: block;
+          max-height: 50vh;
+          overflow: auto;
+        }
+
         #map {
-          height: 58vh;
+          height: auto;
         }
       }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <aside class="sidebar">
+      <aside class="sidebar" id="sidebar">
         <div class="searchBox">
           <input
             id="search"
             type="search"
             placeholder="Pretraga adresa/gradova…"
           />
-          <!-- <div class="hint">Klikni na <b>grad</b> da otvoriš listu, a zatim na <b>adresu</b> da odeš na pin.</div> -->
         </div>
+
+        <!-- Tabs (mobilni) -->
+        <div id="mobileTabs" class="city-tabs" aria-label="Gradovi"></div>
+
+        <!-- Accordion (desktop) + paneli (mobilni) -->
         <div id="accordion"></div>
       </aside>
 
@@ -245,7 +308,7 @@
     </div>
 
     <script>
-      /* ===== Custom pin ikona ===== */
+      /* ===== Custom pin ===== */
       const myIcon = L.icon({
         iconUrl: "./meridianbet-pin.png",
         iconRetinaUrl: "./meridianbet-pin.png",
@@ -254,6 +317,7 @@
         popupAnchor: [0, -38],
       });
 
+      /* ===== PODACI ===== */
       const grouped = {
         Beograd: [
           {
@@ -457,9 +521,8 @@
         ],
       };
 
-      /* ===== MAPA + slojevi ===== */
+      /* ===== Mapa ===== */
       const map = L.map("map").setView([44.8176, 20.4569], 6);
-
       map.createPane("basemap");
       map.createPane("labels");
       map.createPane("markers");
@@ -467,30 +530,22 @@
       map.getPane("labels").style.pointerEvents = "none";
       map.getPane("markers").style.zIndex = 660;
 
-      // DARK bez etiketa
-      const darkBase = L.tileLayer(
+      L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
         {
           pane: "basemap",
           maxZoom: 20,
           attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
         }
-      );
-
-      // DARK samo etikete (beli labeli)
-      const darkLabels = L.tileLayer(
+      ).addTo(map);
+      L.tileLayer(
         "https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png",
         { pane: "labels", maxZoom: 20 }
-      );
+      ).addTo(map);
 
-      // Podrazumevano upali DARK
-      darkBase.addTo(map);
-      darkLabels.addTo(map);
-
-      /* ===== Markeri + indeks ===== */
+      /* Markeri + indeks */
       const markerById = {};
       const boundsAll = [];
-
       for (const [city, items] of Object.entries(grouped)) {
         items.forEach((it) => {
           if (it.lat != null && it.lng != null) {
@@ -498,39 +553,31 @@
               icon: myIcon,
               pane: "markers",
             }).addTo(map)
-              .bindPopup(`<h3 style="margin:.25rem 0">Meridianbet</h3><span class="box"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-  <path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z" fill="none"/>
-  <circle cx="12" cy="9.75" r="2.75" fill="none"/>
-</svg><p style="margin:.25rem 0"> ${it.title}</p></span><span class="box"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-  <!-- Ground -->
-  <path d="M3 21h18" fill="none"/>
-  <!-- Left building -->
-  <path d="M5 21V13h3v8" fill="none"/>
-  <!-- Middle tower -->
-  <path d="M10 21V7h3v14" fill="none"/>
-  <!-- Right building -->
-  <path d="M15 21V10h4v11" fill="none"/>
-  <!-- Few window hints (subtle) -->
-  <path d="M11 10.5h0 M11 13.5h0 M16.5 12h0 M7 15h0" fill="none"/>
-</svg><p style="margin:.25rem 0;opacity:.8">${city}</p></span>`);
+              .bindPopup(`<h3 style="margin:.25rem 0">Meridianbet</h3>
+                <span style="display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z" fill="none" stroke="#73abc1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="9.75" r="2.75" fill="none" stroke="#73abc1" stroke-width="1.8"/></svg>${it.title}</span>
+                <span style="display:flex;align-items:center;gap:8px;opacity:.85"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 21h18M5 21V13h3v8M10 21V7h3v14M15 21V10h4v11" fill="none" stroke="#73abc1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${city}</span>`);
             markerById[it.id] = m;
             boundsAll.push([it.lat, it.lng]);
           }
         });
       }
-      if (boundsAll.length) {
-        map.fitBounds(boundsAll, { padding: [30, 30] });
-      }
+      if (boundsAll.length) map.fitBounds(boundsAll, { padding: [30, 30] });
 
-      /* ===== Accordion UI ===== */
+      /* ===== Accordion + Tabs ===== */
       const accordion = document.getElementById("accordion");
+      const tabsWrap = document.getElementById("mobileTabs");
+      const sidebar = document.getElementById("sidebar");
+
       const countWithCoords = (items) =>
         items.filter((x) => x.lat != null && x.lng != null).length;
 
+      // Render accordion (desktop)
       for (const [city, items] of Object.entries(grouped)) {
         const hasCoords = countWithCoords(items);
+
         const item = document.createElement("div");
         item.className = "acc-item";
+        item.dataset.city = city;
 
         const btn = document.createElement("button");
         btn.className = "acc-btn";
@@ -559,21 +606,18 @@
           row.setAttribute("role", "button");
           row.setAttribute("tabindex", "0");
           row.dataset.addrId = it.id;
-
           row.innerHTML = `
-          <svg class="pin-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
-          </svg>
-          <div>
-            <div>${it.title}</div>
-            <small>${
-              it.lat != null && it.lng != null
-                ? "Klikni za prikaz na mapi"
-                : "Nedostaju koordinate"
-            }</small>
-          </div>
-        `;
-
+            <svg class="pin-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+            </svg>
+            <div>
+              <div>${it.title}</div>
+              <small>${
+                it.lat != null && it.lng != null
+                  ? "Klikni za prikaz na mapi"
+                  : "Nedostaju koordinate"
+              }</small>
+            </div>`;
           const goTo = () => {
             const m = markerById[it.id];
             if (!m) return;
@@ -589,7 +633,6 @@
               }
             });
           }
-
           panel.appendChild(row);
         });
 
@@ -598,14 +641,66 @@
         accordion.appendChild(item);
       }
 
+      // Render mobilnih tabova
+      for (const city of Object.keys(grouped)) {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "city-tab";
+        tab.textContent = city;
+
+        tab.addEventListener("click", () => {
+          const target = [...accordion.children].find(
+            (el) => el.dataset.city === city
+          );
+          const alreadyOpen =
+            target?.classList.contains("open") &&
+            sidebar.classList.contains("expanded") &&
+            tab.classList.contains("active");
+
+          if (alreadyOpen) {
+            // ZATVARANJE: skupi sidebar i zatvori panele
+            sidebar.classList.remove("expanded");
+            tab.classList.remove("active");
+            [...accordion.children].forEach((el) =>
+              el.classList.remove("open")
+            );
+            return;
+          }
+
+          // OTVARANJE: aktiviraj tab, proširi sidebar, otvori panel
+          [...tabsWrap.children].forEach((x) => x.classList.remove("active"));
+          tab.classList.add("active");
+          sidebar.classList.add("expanded");
+          [...accordion.children].forEach((el) => el.classList.remove("open"));
+          if (target) target.classList.add("open");
+
+          // fokusiraj mapu na taj grad
+          const pts = grouped[city]
+            .filter((x) => x.lat != null && x.lng != null)
+            .map((x) => [x.lat, x.lng]);
+          if (pts.length) {
+            const fg = L.featureGroup(pts.map((p) => L.marker(p)));
+            map.fitBounds(fg.getBounds(), { padding: [40, 40] });
+          }
+        });
+
+        tabsWrap.appendChild(tab);
+      }
+      if (tabsWrap.firstElementChild)
+        tabsWrap.firstElementChild.classList.add("active");
+
       /* ===== Pretraga ===== */
       const q = document.getElementById("search");
       q.addEventListener("input", () => {
         const term = q.value.trim().toLowerCase();
+
+        // Ako se nešto traži na mobilu – otvori sidebar da bi se videli rezultati
+        if (term && window.matchMedia("(max-width: 900px)").matches) {
+          document.getElementById("sidebar").classList.add("expanded");
+        }
+
         [...accordion.children].forEach((block) => {
-          const city = block
-            .querySelector(".acc-btn div")
-            .textContent.toLowerCase();
+          const city = (block.dataset.city || "").toLowerCase();
           const rows = [...block.querySelectorAll(".addr")];
           let anyVisible = false;
 
