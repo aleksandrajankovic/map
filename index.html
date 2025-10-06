@@ -27,7 +27,26 @@
         background: #0b1220;
         color: #e5e7eb;
       }
+/* ===== Globalni scrollbar (desno) ===== */
 
+/* Firefox */
+html{
+  scrollbar-width: thin;                    /* auto | thin | none */
+  scrollbar-color: #233045 #0f1821;         /* thumb, track */
+}
+
+/* Chrome / Edge / Safari */
+html::-webkit-scrollbar{
+  width: 12px;                              /* debljina vertikalnog */
+}
+html::-webkit-scrollbar-track{
+  background: #0f1821;                      /* pozadina track-a */
+}
+html::-webkit-scrollbar-thumb{
+  background: #233045;                      /* “palac” */
+  border-radius: 10px;
+  border: 2px solid #0f1821;                /* da se vidi razmak */
+}
       /* Desktop raspored */
       .wrap {
         display: grid;
@@ -161,6 +180,7 @@
         scrollbar-color: #233045 transparent;
         scrollbar-width: thin;
       }
+    
 
       /* Mapa */
       #map {
